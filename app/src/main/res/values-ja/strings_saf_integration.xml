@@ -1,0 +1,15 @@
+<resources>
+    <string name="saf_actions">操作</string>
+    <string name="saf_share">共有</string>
+    <string name="saf_rename">名前を変更</string>
+    <string name="saf_delete">削除</string>
+    <string name="saf_copy">SAFフォルダへコピー</string>
+    <string name="saf_move">SAFフォルダへ移動</string>
+    <string name="saf_write_denied">DocumentsProviderが操作を許可していません。対応している場合は書き込み権限付きでフォルダを再登録してください。</string>
+    <string name="saf_invalid_name">ファイル名が不正です。</string>
+    <string name="saf_permanent_delete">%1$s を完全に削除しますか？ Galleryのゴミ箱には入りません。</string>
+    <string name="saf_copying">DocumentsProvider経由でコピーしています…</string>
+    <string name="saf_copy_done">操作を完了しました。</string>
+    <string name="saf_copy_failed">操作に失敗しました。保存先の権限と空き容量を確認してください。</string>
+    <string name="saf_partial_move">コピーは成功しましたが、元ファイルを削除できませんでした。双方に残っています。</string>
+</resources>

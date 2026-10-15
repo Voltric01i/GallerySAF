@@ -6,4 +6,8 @@
         android:icon="@drawable/ic_plus_vector"
         android:title="@string/add_folder"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/open_saf_gallery"
+        android:title="@string/saf_gallery_title"
+        app:showAsAction="never" />
 </menu>

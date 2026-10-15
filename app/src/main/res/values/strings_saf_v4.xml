@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saf_v4_choose_source">Add included folder</string>
+    <string name="saf_v4_add_provider">Select SAF folder (NTFS Reader, etc.)</string>
+    <string name="saf_v4_add_legacy">Select ordinary storage path</string>
+    <string name="saf_v4_normal_storage">Ordinary storage</string>
+    <string name="saf_v4_provider_prefix">SAF · %1$s</string>
+    <string name="saf_v4_copy_destination">Copy destination</string>
+    <string name="saf_v4_move_destination">Move destination</string>
+    <string name="saf_v4_select_here">Use this folder</string>
+    <string name="saf_v4_loading">Loading folders…</string>
+    <string name="saf_v4_provider_name">SAF storage</string>
+    <string name="saf_v4_unavailable">SAF folder is not accessible. Reconnect or unlock the storage.</string>
+    <string name="saf_v4_destination_read_only">This provider has not granted write permission. Copy/move into it is unavailable.</string>
+    <string name="saf_v4_registered">SAF folder registered</string>
+    <string name="saf_v4_registration_failed">SAF folder registration failed</string>
+    <string name="saf_v4_confirm">Transfer %1$d file(s) to %2$s?</string>
+    <string name="saf_v4_transferring">Transferring files… Do not disconnect the storage.</string>
+    <string name="saf_v4_result">Completed: %1$d; copied but source not deleted: %2$d; failed: %3$d</string>
+</resources>

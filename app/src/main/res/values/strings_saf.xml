@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saf_gallery_title">SAF image browser</string>
+    <string name="saf_add_folder">Add SAF folder</string>
+    <string name="saf_manage_folders">Manage folders</string>
+    <string name="saf_remove_folder">Remove a SAF folder</string>
+    <string name="saf_confirm_remove">Remove this folder from the SAF browser? Files will not be deleted.</string>
+    <string name="saf_no_folders">No SAF folders registered. Select a folder provided by NTFS Reader.</string>
+    <string name="saf_scanning">Scanning SAF folders…</string>
+    <string name="saf_image_count">%1$d images</string>
+    <string name="saf_scan_warning">(%1$d folder(s) could not be read)</string>
+    <string name="saf_read_permission_failed">The provider did not grant persistent read access to this folder.</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saf_v4_choose_source">追加するフォルダの種類</string>
+    <string name="saf_v4_add_provider">SAFフォルダを選択（NTFS Readerなど）</string>
+    <string name="saf_v4_add_legacy">従来のストレージパスを選択</string>
+    <string name="saf_v4_normal_storage">通常のストレージ</string>
+    <string name="saf_v4_provider_prefix">SAF · %1$s</string>
+    <string name="saf_v4_copy_destination">コピー先</string>
+    <string name="saf_v4_move_destination">移動先</string>
+    <string name="saf_v4_select_here">このフォルダを選択</string>
+    <string name="saf_v4_loading">フォルダを読み込んでいます…</string>
+    <string name="saf_v4_provider_name">SAFストレージ</string>
+    <string name="saf_v4_unavailable">SAFフォルダにアクセスできません。ストレージの接続・ロック解除を確認してください。</string>
+    <string name="saf_v4_destination_read_only">このProviderには書き込み権限がありません。コピー・移動先には指定できません。</string>
+    <string name="saf_v4_registered">SAFフォルダを登録しました</string>
+    <string name="saf_v4_registration_failed">SAFフォルダを登録できませんでした</string>
+    <string name="saf_v4_confirm">%1$d個のファイルを「%2$s」に転送しますか？</string>
+    <string name="saf_v4_transferring">転送中です。ストレージを取り外さないでください。</string>
+    <string name="saf_v4_result">完了：%1$d件／コピー済み・元ファイル削除失敗：%2$d件／失敗：%3$d件</string>
+</resources>

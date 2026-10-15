@@ -126,6 +126,7 @@ import org.fossify.gallery.helpers.LOCATION_INTERNAL
 import org.fossify.gallery.helpers.MAX_COLUMN_COUNT
 import org.fossify.gallery.helpers.MONTH_MILLISECONDS
 import org.fossify.gallery.helpers.MediaFetcher
+import org.fossify.gallery.helpers.SafAlbumStore
 import org.fossify.gallery.helpers.PICKED_PATHS
 import org.fossify.gallery.helpers.RECYCLE_BIN
 import org.fossify.gallery.helpers.SET_WALLPAPER_INTENT
@@ -1116,7 +1117,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
         var isPlaceholderVisible = dirs.isEmpty()
 
         runOnUiThread {
-            checkPlaceholderVisibility(dirs)
+            checkPlaceholderVisibility(if (SafAlbumStore.albums(this).isNotEmpty()) SafAlbumStore.albums(this) else dirs)
             setupAdapter(dirs.clone() as ArrayList<Directory>)
         }
 
@@ -1379,7 +1380,8 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
 
         runOnUiThread {
             binding.directoriesRefreshLayout.isRefreshing = false
-            checkPlaceholderVisibility(dirs)
+            val placeholderDirs = if (SafAlbumStore.albums(this).isNotEmpty()) SafAlbumStore.albums(this) else dirs
+            checkPlaceholderVisibility(placeholderDirs)
         }
 
         checkInvalidDirectories(dirs)
@@ -1477,6 +1479,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
     ) {
         val currAdapter = binding.directoriesGrid.adapter
         val distinctDirs = dirs
+            .filterNot { SafAlbumStore.isSafAlbumPath(it.path) }
             .distinctBy { it.path.getDistinctPath() }
             .toMutableList() as ArrayList<Directory>
 
@@ -1486,6 +1489,10 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
             allDirs = mDirs,
             currentPathPrefix = mCurrentPathPrefix
         ).clone() as ArrayList<Directory>
+        // SAF albums are display-only; do not send their synthetic paths to SQLite/MediaStore.
+        if (!mIsThirdPartyIntent && mCurrentPathPrefix.isEmpty() && !config.showAll) {
+            dirsToShow.addAll(0, SafAlbumStore.albums(this))
+        }
 
         if (currAdapter == null || forceRecreate) {
             mDirsIgnoringSearch = dirs
@@ -1500,7 +1507,13 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
             ) {
                 val clickedDir = it as Directory
                 val path = clickedDir.path
-                if (clickedDir.subfoldersCount == 1 || !config.groupDirectSubfolders) {
+                if (SafAlbumStore.isSafAlbumPath(path)) {
+                    SafAlbumStore.treeUriFromAlbumPath(path)?.let { treeUri ->
+                        startActivity(Intent(this, SafNativeAlbumActivity::class.java).apply {
+                            putExtra(SafGalleryActivity.EXTRA_TREE_URI, treeUri.toString())
+                        })
+                    }
+                } else if (clickedDir.subfoldersCount == 1 || !config.groupDirectSubfolders) {
                     if (path != config.tempFolderPath) {
                         itemClicked(path)
                     }
@@ -1603,7 +1616,8 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
         }
     }
 
-    private fun getCurrentlyDisplayedDirs() = getRecyclerAdapter()?.dirs ?: ArrayList()
+    private fun getCurrentlyDisplayedDirs() = (getRecyclerAdapter()?.dirs ?: ArrayList())
+        .filterNot { SafAlbumStore.isSafAlbumPath(it.path) }.toCollection(ArrayList())
 
     private fun setupLatestMediaId() {
         ensureBackgroundThread {

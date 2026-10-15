@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saf_gallery_title">SAF画像ブラウザ</string>
+    <string name="saf_add_folder">SAFフォルダを追加</string>
+    <string name="saf_manage_folders">登録フォルダ管理</string>
+    <string name="saf_remove_folder">SAFフォルダを削除</string>
+    <string name="saf_confirm_remove">SAFブラウザの登録から削除しますか？元のファイルは削除しません。</string>
+    <string name="saf_no_folders">SAFフォルダは未登録です。NTFS Readerのフォルダを選択してください。</string>
+    <string name="saf_scanning">SAFフォルダを走査しています…</string>
+    <string name="saf_image_count">画像 %1$d 件</string>
+    <string name="saf_scan_warning">（%1$d 個のフォルダを読み取れませんでした）</string>
+    <string name="saf_read_permission_failed">このフォルダの永続的な読み取り権限を取得できませんでした。</string>
+</resources>

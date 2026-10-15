@@ -1,5 +1,9 @@
 package org.fossify.gallery.adapters
 
+import org.fossify.gallery.activities.SafNativeAlbumActivity
+import android.net.Uri
+import org.fossify.gallery.helpers.SafTransferDialog
+import org.fossify.gallery.helpers.SafAlbumStore
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
@@ -109,6 +113,7 @@ class MediaAdapter(
     private val ITEM_MEDIUM_VIDEO_PORTRAIT = 1
     private val ITEM_MEDIUM_PHOTO = 2
 
+    private val isNativeSaf = SafAlbumStore.isSafAlbumPath(path)
     private val config = activity.config
     private val viewType = config.getFolderViewType(if (config.showAll) SHOW_ALL else path)
     private val isListViewType = viewType == VIEW_TYPE_LIST
@@ -178,6 +183,15 @@ class MediaAdapter(
     }
 
     override fun prepareActionMode(menu: Menu) {
+        if (isNativeSaf) {
+            val allowed = setOf(R.id.cab_share, R.id.cab_rename, R.id.cab_delete,
+                R.id.cab_copy_to, R.id.cab_move_to, R.id.cab_properties,
+                R.id.cab_select_all)
+            for (i in 0 until menu.size()) {
+                menu.getItem(i).isVisible = menu.getItem(i).itemId in allowed
+            }
+            return
+        }
         val selectedItems = getSelectedItems()
         if (selectedItems.isEmpty()) {
             return
@@ -205,6 +219,15 @@ class MediaAdapter(
     }
 
     override fun actionItemPressed(id: Int) {
+        if (isNativeSaf) {
+            if (id == R.id.cab_select_all) {
+                selectAll()
+            } else {
+                (activity as? SafNativeAlbumActivity)?.handleSafAction(id, getSelectedItems())
+                finishActMode()
+            }
+            return
+        }
         if (selectedKeys.isEmpty()) {
             return
         }
@@ -460,7 +483,7 @@ class MediaAdapter(
         }
     }
 
-    private fun copyMoveTo(isCopyOperation: Boolean) {
+    private fun copyMoveTo(isCopyOperation: Boolean, useSafPicker: Boolean = true) {
         val paths = getSelectedPaths()
 
         val recycleBinPath = activity.recycleBinPath
@@ -476,6 +499,22 @@ class MediaAdapter(
             return
         }
 
+        if (useSafPicker && SafAlbumStore.registeredRoots(activity).isNotEmpty()) {
+            SafTransferDialog(activity).show(
+                sourcePaths = fileDirItems.map { it.path },
+                copy = isCopyOperation,
+                onUseOriginalPicker = { copyMoveTo(isCopyOperation, false) },
+                onComplete = {
+                    if (!isCopyOperation) {
+                        activity.rescanPaths(ArrayList(fileDirItems.map { it.path })) {
+                            listener?.refreshItems()
+                        }
+                        finishActMode()
+                    }
+                }
+            )
+            return
+        }
         activity.tryCopyMoveFilesTo(fileDirItems, isCopyOperation) {
             val destinationPath = it
             config.tempFolderPath = ""
@@ -738,6 +777,10 @@ class MediaAdapter(
                 }
             )
 
+            if (isNativeSaf) {
+                Glide.with(activity).load(Uri.parse(medium.path))
+                    .centerCrop().into(mediumThumbnail)
+            } else {
             activity.loadImage(
                 type = medium.type,
                 path = path,
@@ -753,6 +796,7 @@ class MediaAdapter(
                     mediumThumbnail.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_vector_warning_colored))
                 }
             )
+            }
 
             if (isListViewType) {
                 mediumName.setTextColor(textColor)

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saf_native_column_count">Column count</string>
+    <string name="saf_native_read_failed">Unable to read the selected SAF folder</string>
+    <string name="saf_native_name">Filename</string>
+    <string name="saf_native_newest">Newest first</string>
+    <string name="saf_native_oldest">Oldest first</string>
+    <string name="saf_native_properties">Properties</string>
+    <string name="saf_native_delete_confirm">Permanently delete %1$d selected file(s)?</string>
+    <string name="saf_native_failed">%1$d operation(s) failed. Check provider permissions and free space.</string>
+</resources>

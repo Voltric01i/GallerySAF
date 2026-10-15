@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saf_native_column_count">表示列数</string>
+    <string name="saf_native_read_failed">選択したSAFフォルダを読み込めません</string>
+    <string name="saf_native_name">ファイル名</string>
+    <string name="saf_native_newest">新しい順</string>
+    <string name="saf_native_oldest">古い順</string>
+    <string name="saf_native_properties">プロパティ</string>
+    <string name="saf_native_delete_confirm">選択した%1$d個のファイルを完全に削除しますか？</string>
+    <string name="saf_native_failed">%1$d件の操作に失敗しました。Providerの権限や空き容量を確認してください。</string>
+</resources>

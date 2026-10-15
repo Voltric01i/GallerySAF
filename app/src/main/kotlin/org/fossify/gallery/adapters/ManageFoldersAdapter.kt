@@ -1,5 +1,6 @@
 package org.fossify.gallery.adapters
 
+import org.fossify.gallery.helpers.SafAlbumStore
 import android.view.*
 import androidx.appcompat.widget.PopupMenu
 import org.fossify.commons.activities.BaseSimpleActivity
@@ -66,7 +67,9 @@ class ManageFoldersAdapter(
             root.setupViewBackground(activity)
             manageFolderHolder.isSelected = selectedKeys.contains(folder.hashCode())
             manageFolderTitle.apply {
-                text = folder
+                text = if (!isShowingExcludedFolders && folder.startsWith("content://")) {
+                    "SAF · ${SafAlbumStore.albumLabel(activity, folder)}"
+                } else folder
                 setTextColor(context.getProperTextColor())
             }
 
@@ -117,6 +120,8 @@ class ManageFoldersAdapter(
             removeFolders.add(it)
             if (isShowingExcludedFolders) {
                 config.removeExcludedFolder(it)
+            } else if (it.startsWith("content://")) {
+                SafAlbumStore.unregisterRoot(activity, it)
             } else {
                 config.removeIncludedFolder(it)
             }

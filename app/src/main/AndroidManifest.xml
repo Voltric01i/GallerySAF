@@ -87,6 +87,13 @@
             </intent-filter>
         </activity>
 
+        <!-- SAF albums use the same Gallery media layout and adapter. -->
+        <activity android:name=".activities.SafNativeAlbumActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.MainActivity" />
+        <activity android:name=".activities.SafNativeViewerActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.SafNativeAlbumActivity" />
         <activity
             android:name=".activities.MediaActivity"
             android:configChanges="orientation"
@@ -169,6 +176,11 @@
             android:parentActivityName=".activities.MediaActivity"
             android:theme="@style/TranslucentTheme" />
 
+        <activity
+            android:name=".activities.SafGalleryActivity"
+            android:exported="false"
+            android:label="@string/saf_gallery_title"
+            android:parentActivityName=".activities.IncludedFoldersActivity" />
         <activity
             android:name=".activities.IncludedFoldersActivity"
             android:configChanges="orientation"

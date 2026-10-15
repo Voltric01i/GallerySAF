@@ -1,6 +1,7 @@
 package org.fossify.gallery.adapters
 
 import android.content.Intent
+import android.net.Uri
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.ColorDrawable
@@ -106,6 +107,7 @@ import org.fossify.gallery.helpers.TYPE_VIDEOS
 import org.fossify.gallery.interfaces.DirectoryOperationsListener
 import org.fossify.gallery.models.AlbumCover
 import org.fossify.gallery.models.Directory
+import org.fossify.gallery.helpers.SafAlbumStore
 import java.io.File
 import java.util.Collections
 
@@ -159,7 +161,7 @@ class DirectoryAdapter(
 
     override fun onBindViewHolder(holder: MyRecyclerViewAdapter.ViewHolder, position: Int) {
         val dir = dirs.getOrNull(position) ?: return
-        holder.bindView(dir, true, !isPickIntent) { itemView, adapterPosition ->
+        holder.bindView(dir, true, !isPickIntent && !SafAlbumStore.isSafAlbumPath(dir.path)) { itemView, adapterPosition ->
             setupView(itemView, dir, holder)
         }
         bindViewHolder(holder)
@@ -224,9 +226,10 @@ class DirectoryAdapter(
         }
     }
 
-    override fun getSelectableItemCount() = dirs.size
+    override fun getSelectableItemCount() = dirs.count { !SafAlbumStore.isSafAlbumPath(it.path) }
 
-    override fun getIsItemSelectable(position: Int) = true
+    override fun getIsItemSelectable(position: Int) =
+        dirs.getOrNull(position)?.let { !SafAlbumStore.isSafAlbumPath(it.path) } ?: false
 
     override fun getItemSelectionKey(position: Int) = dirs.getOrNull(position)?.path?.hashCode()
 
@@ -835,7 +838,11 @@ class DirectoryAdapter(
     private fun setupView(view: View, directory: Directory, holder: ViewHolder) {
         val isSelected = selectedKeys.contains(directory.path.hashCode())
         bindItem(view).apply {
-            dirPath?.text = "${directory.path.substringBeforeLast("/")}/"
+            dirPath?.text = if (SafAlbumStore.isSafAlbumPath(directory.path)) {
+                activity.getString(R.string.saf_gallery_title)
+            } else {
+                "${directory.path.substringBeforeLast("/")}/"
+            }
             val thumbnailType = when {
                 directory.tmb.isVideoFast() -> TYPE_VIDEOS
                 directory.tmb.isGif() -> TYPE_GIFS
@@ -892,20 +899,29 @@ class DirectoryAdapter(
                     }
                 )
 
-                activity.loadImage(
-                    type = thumbnailType,
-                    path = directory.tmb,
-                    target = dirThumbnail,
-                    horizontalScroll = scrollHorizontally,
-                    animateGifs = animateGifs,
-                    cropThumbnails = cropThumbnails,
-                    roundCorners = roundedCorners,
-                    signature = directory.getKey(),
-                    onError = {
-                        dirThumbnail.scaleType = ImageView.ScaleType.CENTER
-                        dirThumbnail.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_vector_warning_colored))
+
+                if (SafAlbumStore.isSafAlbumPath(directory.path)) {
+                    if (directory.tmb.isNotEmpty()) {
+                        Glide.with(activity).load(Uri.parse(directory.tmb)).centerCrop().into(dirThumbnail)
+                    } else {
+                        dirThumbnail.setImageResource(org.fossify.commons.R.drawable.ic_usb_vector)
                     }
-                )
+                } else {
+                    activity.loadImage(
+                        type = thumbnailType,
+                        path = directory.tmb,
+                        target = dirThumbnail,
+                        horizontalScroll = scrollHorizontally,
+                        animateGifs = animateGifs,
+                        cropThumbnails = cropThumbnails,
+                        roundCorners = roundedCorners,
+                        signature = directory.getKey(),
+                        onError = {
+                            dirThumbnail.scaleType = ImageView.ScaleType.CENTER
+                            dirThumbnail.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_vector_warning_colored))
+                        }
+                    )
+                }
             }
 
             dirPin.beVisibleIf(pinnedFolders.contains(directory.path))
