@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.CancellationSignal
 import android.view.Menu
 import android.widget.EditText
 import android.widget.Toast
@@ -31,12 +32,15 @@ import org.fossify.gallery.models.Medium
 import org.fossify.gallery.models.ThumbnailItem
 import java.security.MessageDigest
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 /** Native Gallery grid/list adapter displaying SAF backed Medium instances. */
 class SafNativeAlbumActivity : SimpleActivity(), MediaOperationsListener {
     private val binding by viewBinding(ActivityMediaBinding::inflate)
     private val worker = Executors.newSingleThreadExecutor()
-    private var generation = 0
+    @Volatile private var generation = 0
+    private var scanCancellation: CancellationSignal? = null
+    private var scanTask: Future<*>? = null
     private lateinit var tree: Uri
     private var allMedia = arrayListOf<Medium>()
     private var transferSources = listOf<Medium>()
@@ -114,23 +118,32 @@ class SafNativeAlbumActivity : SimpleActivity(), MediaOperationsListener {
     }
 
     private fun loadMedia() {
+        // Cancel a preceding query immediately if the user refreshes repeatedly.
+        scanCancellation?.cancel()
+        scanTask?.cancel(true)
+        val cancel = CancellationSignal()
+        scanCancellation = cancel
         val scanId = ++generation
         binding.loadingIndicator.show()
-        worker.execute {
-            val outcome = runCatching { SafNativeMedia.scan(this, tree) }
+        scanTask = worker.submit {
+            val outcome = runCatching { SafNativeMedia.scan(this, tree, cancel) }
             runOnUiThread {
                 if (isDestroyed || scanId != generation) return@runOnUiThread
+                scanTask = null
+                scanCancellation = null
                 outcome.onSuccess {
                     allMedia = it
                     SafAlbumStore.updateAlbum(this, tree.toString(), albumNameForTree(),
                         it.firstOrNull()?.path?.let(Uri::parse), it.size)
                     applyAdapter(it)
-                }
-                    .onFailure {
-                        binding.loadingIndicator.hide()
-                        binding.mediaRefreshLayout.isRefreshing = false
+                }.onFailure {
+                    binding.loadingIndicator.hide()
+                    binding.mediaRefreshLayout.isRefreshing = false
+                    if (it !is android.os.OperationCanceledException &&
+                        it !is java.util.concurrent.CancellationException) {
                         toastError(getString(R.string.saf_native_read_failed) + ": " + (it.message ?: ""))
                     }
+                }
             }
         }
     }
@@ -322,7 +335,14 @@ class SafNativeAlbumActivity : SimpleActivity(), MediaOperationsListener {
     override fun selectedPaths(paths: ArrayList<String>) = Unit
     override fun updateMediaGridDecoration(media: ArrayList<ThumbnailItem>) = Unit
 
-    override fun onResume() { super.onResume(); if (::tree.isInitialized && allMedia.isNotEmpty()) loadMedia() }
-    override fun onDestroy() { generation++; worker.shutdownNow(); super.onDestroy() }
+    // Returning from the viewer reuses the already loaded image list.
+    // An explicit swipe-to-refresh or successful file mutation invokes loadMedia().
+    override fun onDestroy() {
+        generation++
+        scanCancellation?.cancel()
+        scanTask?.cancel(true)
+        worker.shutdownNow()
+        super.onDestroy()
+    }
     private fun toastError(message: String) = Toast.makeText(this, message, Toast.LENGTH_LONG).show()
 }
